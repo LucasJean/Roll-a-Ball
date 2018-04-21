@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour {
     public float speed;
     public Text countText;
     public Text winText;
+    public AudioClip jumpSound;
 
     private Rigidbody rb;
     private int count;
@@ -17,7 +18,9 @@ public class PlayerController : MonoBehaviour {
 
     private bool onGround;
     private bool jumping;
-    private float jumpAcceleration; 
+    private float jumpAcceleration;
+
+    private AudioSource ballAudioSource;
 
     void Start()
     {
@@ -28,6 +31,8 @@ public class PlayerController : MonoBehaviour {
 
         onGround = true;
         jumpAcceleration = jumpVelocity / jumpTime;
+
+        ballAudioSource = GetComponent<AudioSource>();
     }
 
     void FixedUpdate()
@@ -45,6 +50,7 @@ public class PlayerController : MonoBehaviour {
             {
                 jumping = true;
                 onGround = false;
+                ballAudioSource.Play();
             }
         }
 
