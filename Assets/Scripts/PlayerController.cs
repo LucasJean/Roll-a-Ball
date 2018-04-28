@@ -2,24 +2,30 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour {
 
     public float speed;
     public Text countText;
     public Text winText;
-    public AudioClip jumpSound;
 
     private Rigidbody rb;
     private int count;
 
     public float jumpTime;
     public float jumpVelocity;
+    public float rollTime;
+    public float rollVelocity;
+    public float deAccelFactor;
+    public float stoppingVelocity;
 
     private bool onGround;
     private bool jumping;
     private float jumpAcceleration;
-
+    private float rollAcceleration;
+    private bool movable;
+    
     private AudioSource ballAudioSource;
 
     void Start()
@@ -31,6 +37,7 @@ public class PlayerController : MonoBehaviour {
 
         onGround = true;
         jumpAcceleration = jumpVelocity / jumpTime;
+        rollAcceleration = rollVelocity / rollTime;
 
         ballAudioSource = GetComponent<AudioSource>();
     }
@@ -41,9 +48,41 @@ public class PlayerController : MonoBehaviour {
         float moveVertical = Input.GetAxis("Vertical");
 
         Vector3 movement = new Vector3(moveHorizontal, 0f, moveVertical);
+        movement = movement.normalized;
 
-        rb.AddForce(movement * speed);
+        //rb.AddForce(movement * speed);
 
+        if (movement != Vector3.zero)
+        {
+            float deltaVelocity = rollAcceleration * Time.deltaTime;
+
+            if (movable)
+                rb.velocity += movement * deltaVelocity;
+
+            Vector3 xzMove = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+
+            if (xzMove.magnitude >= rollVelocity)
+                movable = false;
+            else
+                movable = true;
+        }
+
+        if (movement == Vector3.zero && rb.velocity.magnitude > 0f && onGround)
+        {
+            float newVelocity = rb.velocity.magnitude;
+            newVelocity *= 1 / Mathf.Pow(deAccelFactor, Time.deltaTime);
+
+            if (newVelocity < stoppingVelocity)
+                newVelocity = 0f;
+
+            rb.velocity = rb.velocity.normalized * newVelocity;
+        }
+        
+        Jump();
+    }
+
+    void Jump()
+    {
         if (onGround)
         {
             if (Input.GetButtonDown("Jump"))
@@ -54,8 +93,6 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        jumpAcceleration = jumpVelocity / jumpTime;
-
         if (jumping)
         {
             float deltaVelocity = jumpAcceleration * Time.deltaTime;
@@ -64,19 +101,13 @@ public class PlayerController : MonoBehaviour {
             if (rb.velocity.y >= jumpVelocity)
             {
                 jumping = false;
-
             }
         }
     }
-
-    float jump_acc(float dt)
-    {
-        return 300 * dt;
-    }
-
+    
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.name == "Ground")
+        if (collision.gameObject.tag == "Ground")
         {
             onGround = true;
         }
@@ -102,6 +133,7 @@ public class PlayerController : MonoBehaviour {
         if (count >= 12)
         {
             winText.text = "You Win!";
+            SceneManager.LoadScene("Fase 2");
         }
     }
 }
