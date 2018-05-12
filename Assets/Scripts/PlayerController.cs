@@ -15,16 +15,20 @@ public class PlayerController : MonoBehaviour {
 
     public float jumpTime;
     public float jumpVelocity;
-    public float rollTime;
-    public float rollVelocity;
+
+    public float rollAccelTime;
+    public float rollMaxSpeed;
+    public float turnMaxSpeed;  //testing
     public float deAccelFactor;
     public float stoppingVelocity;
 
     private bool onGround;
     private bool jumping;
     private float jumpAcceleration;
+
     private float rollAcceleration;
-    private bool movable;
+    private bool speedIsMax = false;
+
     
     private AudioSource ballAudioSource;
 
@@ -37,37 +41,70 @@ public class PlayerController : MonoBehaviour {
 
         onGround = true;
         jumpAcceleration = jumpVelocity / jumpTime;
-        rollAcceleration = rollVelocity / rollTime;
+
+        rollAcceleration = rollMaxSpeed / rollAccelTime;
 
         ballAudioSource = GetComponent<AudioSource>();
     }
 
     void FixedUpdate()
     {
-        float moveHorizontal = Input.GetAxis("Horizontal");
-        float moveVertical = Input.GetAxis("Vertical");
+        MoveBall();
+        
+        Jump();
+    }
+    
 
-        Vector3 movement = new Vector3(moveHorizontal, 0f, moveVertical);
-        movement = movement.normalized;
+    void MoveBall()
+    {
+        float inputFrontal = Input.GetAxis("Horizontal");
+        float inputLateral = Input.GetAxis("Vertical");
 
-        //rb.AddForce(movement * speed);
+        Vector3 moveInput = new Vector3(inputFrontal, 0f, inputLateral);
+        moveInput = moveInput.normalized;
 
-        if (movement != Vector3.zero)
+
+        Vector3 xzBallMovement = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+        float ballSpeed = xzBallMovement.magnitude;
+        Vector3 ballDirection = xzBallMovement.normalized;
+        float angleMoveToInput;
+
+        if (moveInput != Vector3.zero && ballDirection != Vector3.zero)
+            angleMoveToInput = Vector3.Angle(ballDirection, moveInput) * Mathf.Deg2Rad;
+        else
+            angleMoveToInput = 0f;
+
+        float speedInput = Mathf.Cos(angleMoveToInput);
+        float turnInput = Mathf.Sin(angleMoveToInput);
+
+        //if (ballSpeed >= rollMaxSpeed)
+        //    speedIsMax = true;
+        //else
+        //    speedIsMax = false;
+
+
+        if (moveInput != Vector3.zero)
         {
-            float deltaVelocity = rollAcceleration * Time.deltaTime;
+            float deltaSpeed = rollAcceleration * speedInput * Time.deltaTime;
 
-            if (movable)
-                rb.velocity += movement * deltaVelocity;
+            ballSpeed += deltaSpeed;
+            if (ballSpeed > rollMaxSpeed) ballSpeed = rollMaxSpeed;
 
-            Vector3 xzMove = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-
-            if (xzMove.magnitude >= rollVelocity)
-                movable = false;
+            if (angleMoveToInput == 0f)
+                ballDirection = moveInput * speedInput;
             else
-                movable = true;
+            {
+                float deltaAngle = angleMoveToInput * turnMaxSpeed * Time.deltaTime;
+                ballDirection = Vector3.RotateTowards(ballDirection, moveInput, deltaAngle, 0f);
+            }
+            
+            Vector3 ballMove = ballDirection * ballSpeed;
+
+            rb.velocity = new Vector3(ballMove.x, rb.velocity.y, ballMove.z);
         }
 
-        if (movement == Vector3.zero && rb.velocity.magnitude > 0f && onGround)
+
+        if (moveInput == Vector3.zero && rb.velocity.magnitude > 0f && onGround)
         {
             float newVelocity = rb.velocity.magnitude;
             newVelocity *= 1 / Mathf.Pow(deAccelFactor, Time.deltaTime);
@@ -77,9 +114,44 @@ public class PlayerController : MonoBehaviour {
 
             rb.velocity = rb.velocity.normalized * newVelocity;
         }
-        
-        Jump();
+
     }
+
+
+    //void MoveBall()
+    //{
+    //    float moveHorizontal = Input.GetAxis("Horizontal");
+    //    float moveVertical = Input.GetAxis("Vertical");
+
+    //    Vector3 movement = new Vector3(moveHorizontal, 0f, moveVertical);
+    //    movement = movement.normalized;
+
+    //    if (movement != Vector3.zero)
+    //    {
+    //        float deltaVelocity = rollAcceleration * Time.deltaTime;
+
+    //        if (movable)
+    //            rb.velocity += movement * deltaVelocity;
+
+    //        Vector3 xzMove = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+
+    //        if (xzMove.magnitude >= rollVelocity)
+    //            movable = false;
+    //        else
+    //            movable = true;
+    //    }
+
+    //    if (movement == Vector3.zero && rb.velocity.magnitude > 0f && onGround)
+    //    {
+    //        float newVelocity = rb.velocity.magnitude;
+    //        newVelocity *= 1 / Mathf.Pow(deAccelFactor, Time.deltaTime);
+
+    //        if (newVelocity < stoppingVelocity)
+    //            newVelocity = 0f;
+
+    //        rb.velocity = rb.velocity.normalized * newVelocity;
+    //    }
+    //}
 
     void Jump()
     {
