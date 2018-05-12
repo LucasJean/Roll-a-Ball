@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657958, g: 0.49641377, b: 0.5748177, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657928, g: 0.4964131, b: 0.5748174, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -1935,6 +1935,26 @@ Prefab:
       propertyPath: winText
       value: 
       objectReference: {fileID: 1784617269}
+    - target: {fileID: 82960057453414906, guid: 9c63ead627006ea4f846eb1035631e75,
+        type: 2}
+      propertyPath: panLevelCustomCurve.m_Curve.Array.data[0].value
+      value: 0.45
+      objectReference: {fileID: 0}
+    - target: {fileID: 114307888229280972, guid: 9c63ead627006ea4f846eb1035631e75,
+        type: 2}
+      propertyPath: rollAccelTime
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114307888229280972, guid: 9c63ead627006ea4f846eb1035631e75,
+        type: 2}
+      propertyPath: rollMaxSpeed
+      value: 8.07
+      objectReference: {fileID: 0}
+    - target: {fileID: 114307888229280972, guid: 9c63ead627006ea4f846eb1035631e75,
+        type: 2}
+      propertyPath: turnMaxSpeed
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 9c63ead627006ea4f846eb1035631e75, type: 2}
   m_IsPrefabParent: 0
