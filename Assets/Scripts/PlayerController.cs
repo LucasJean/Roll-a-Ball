@@ -27,7 +27,7 @@ public class PlayerController : MonoBehaviour {
     private float jumpAcceleration;
 
     private float rollAcceleration;
-    private bool speedIsMax = false;
+    //private bool speedIsMax = false;
 
     
     private AudioSource ballAudioSource;
@@ -63,7 +63,6 @@ public class PlayerController : MonoBehaviour {
         Vector3 moveInput = new Vector3(inputFrontal, 0f, inputLateral);
         moveInput = moveInput.normalized;
 
-
         Vector3 xzBallMovement = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
         float ballSpeed = xzBallMovement.magnitude;
         Vector3 ballDirection = xzBallMovement.normalized;
@@ -90,9 +89,9 @@ public class PlayerController : MonoBehaviour {
             ballSpeed += deltaSpeed;
             if (ballSpeed > rollMaxSpeed) ballSpeed = rollMaxSpeed;
 
-            if (angleMoveToInput == 0f)
+            if (rb.velocity == Vector3.zero) //angleMoveToInput == 0f
                 ballDirection = moveInput * speedInput;
-            else
+            else if (angleMoveToInput < 135 * Mathf.Deg2Rad)
             {
                 float deltaAngle = angleMoveToInput * turnMaxSpeed * Time.deltaTime;
                 ballDirection = Vector3.RotateTowards(ballDirection, moveInput, deltaAngle, 0f);
@@ -176,7 +175,46 @@ public class PlayerController : MonoBehaviour {
             }
         }
     }
-    
+
+    //void Jump()
+    //{
+
+    //    if (onGround)
+    //    {
+    //        if (Input.GetButtonDown("Jump"))
+    //        {
+    //            jumping = true;
+    //            onGround = false;
+    //            //rb.transform.position += new Vector3(0f, 0.1f, 0f);
+    //            ballAudioSource.Play();
+
+    //            timeJumped = Time.time;
+    //        }
+    //    }
+
+    //    if (!onGround)
+    //    {
+    //        float deltaSpeed;
+    //        float deltaTimeJumped = Time.time - timeJumped;
+
+    //        if (jumping)
+    //        {
+    //            deltaSpeed = jumpAcceleration * Time.deltaTime;
+    //            if (deltaTimeJumped >= jumpTime) //rb.velocity.y >= jumpVelocity
+    //            {
+    //                jumping = false;
+    //            }
+    //        }
+
+    //        else
+    //        {
+    //            deltaSpeed = -gravityAcceleration * Time.deltaTime;
+
+    //        }
+    //        rb.velocity += new Vector3(0, deltaSpeed, 0);
+    //    }
+    //}
+
     void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.tag == "Ground")
@@ -205,7 +243,7 @@ public class PlayerController : MonoBehaviour {
         if (count >= 12)
         {
             winText.text = "You Win!";
-            SceneManager.LoadScene("Fase 2");
+            SceneManager.LoadScene("Minigame");
         }
     }
 }
